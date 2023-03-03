@@ -1,5 +1,6 @@
 # clinicalRecords
-
+server port: 1234
+db: mongoDB (compass on localhost)
 usage:
 GET:
 /api/autentication 
