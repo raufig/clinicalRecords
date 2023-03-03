@@ -203,7 +203,7 @@ ctrl.createRecord = async (data, res) => {
       const doctorId = data.params.id
       
       const patientData = await Patient.findOne({ document: data.body.document })
-      console.log("AQUI", patientData)
+      
       const populatedData = await ClinicalRecord.find({ patientId: patientData._id.toString(), signature: doctorId })
       .populate({path:'anamesi'})
       .populate({path: 'background' })
@@ -243,7 +243,7 @@ ctrl.createRecord = async (data, res) => {
         surgery:{},
       }
       for(const key in data.body){
-        console.log("KEYS: ",key)
+        
         if(key ==='Analysis')model = Analysis;
         if(key ==='Anamesi')model = Anamesi;
         if(key ==='Background')model = Background;
@@ -253,13 +253,13 @@ ctrl.createRecord = async (data, res) => {
         if(key ==='Surgery')model = Surgery;
         const collection = new model(data.body[key])
         const savedData = await collection.save()
-        //console.log(savedData)
+        
         const updateClinicalRecords = await ClinicalRecord.findByIdAndUpdate(savedData.clinicalRecordId, {[key.toLowerCase()]: savedData._id.toString() }, {new:true})
-        console.log("AQUI ", updateClinicalRecords)
+        
         Object.assign(payload[key],  savedData)
       }
 
-      //console.log(payload)
+      
       res.setHeader("Content-Type", "application/json")
       .setHeader("Access-Control-Allow-Origin", "*")
       .writeHead(200)
@@ -301,8 +301,7 @@ const PDFDocument = require('pdfkit');
 ctrl.downloadFile =async( data, res) => {
   let kindOfUser = data.path.split('/')[2]
   let _token = await token(data.params.id, kindOfUser);
-  console.log(_token)
-  console.log(data.headers.authorization)
+
   if(data.headers.authorization.replace('Bearer ','') !== _token){
     return res.writeHead(400)
         .end("user is not autenticated")

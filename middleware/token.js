@@ -6,7 +6,7 @@ const { Doctor } = require('../model/doctor.model')
 
 
 const token = async (id, type) => {
-    console.log("TOKEN ",type)
+    
     let kindOfUser = type
     var model='';
     if(kindOfUser === 'patient') model = Patient

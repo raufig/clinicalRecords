@@ -9,7 +9,7 @@ const server = http.createServer(function(req, res) {
   let parsedURL = url.parse(req.url, true);
   let path = parsedURL.pathname.toString();
 
-  console.log(path);
+  //console.log(path);
   let qs = {params: parsedURL.query};
   qs = JSON.parse(JSON.stringify(qs));
   let headers = req.headers;
@@ -18,7 +18,7 @@ const server = http.createServer(function(req, res) {
   let body = "";
 
   req.on("data", function(data) {
-    console.log("got some data");
+    //console.log("got some data");
     body += data.toString();
   });
 
