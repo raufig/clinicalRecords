@@ -211,8 +211,10 @@ body:
 PUT:
 '/api/patient/sendEmailChangePassword'
 http://localhost:1234/api/patient/sendEmailChangePassword?email=raufig@gmail.com
+
 '/api/hospital/sendEmailChangePassword'
 http://localhost:1234/api/hospital/sendEmailChangePassword?email=raufig@gmail.com
+
 '/api/doctor/sendEmailChangePassword'
 http://localhost:1234/api/doctor/sendEmailChangePassword?email=raufig@gmail.com
 
