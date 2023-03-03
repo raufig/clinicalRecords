@@ -20,12 +20,17 @@ routes.GET = {
   '/api/patient/login': ctrl.login,
   '/api/hospital/login': ctrl.login,
   '/api/doctor/login': ctrl.login,
-  //.end HTML WITH INPUTS to change password
+  
   '/api/patient/changePassword': ctrl.changePass,
   '/api/hospital/changePassword': ctrl.changePass,
   '/api/doctor/changePassword': ctrl.changePass,
 
-  '/api/doctor/createRecord': ctrl.createRecord
+  '/api/doctor/createRecord': ctrl.createRecord, //doctor can review the prev clinicals records created by him using the patient document
+  '/api/user/getClinicalRecords': ctrl.getClinicalRecords,
+  '/api/hospital/getClinicalRecords': ctrl.getClinicalRecords,
+
+  '/api/user/downloadFile': ctrl.getClinicalRecords,
+  '/api/hospital/downloadFile': ctrl.getClinicalRecords
 }
 
 routes.POST = {
@@ -36,17 +41,13 @@ routes.POST = {
   '/api/hospital/changePassword': ctrl.changePass,
   '/api/doctor/changePassword': ctrl.changePass,
   
-  '/api/doctor/createRecord': ctrl.createRecord
+  '/api/doctor/createRecord': ctrl.createRecord //doctor post new updated to a clinical record of a new one
 }
 
 routes.PUT = {
   '/api/patient/sendEmailChangePassword': ctrl.emailChangePass,
   '/api/hospital/sendEmailChangePassword': ctrl.emailChangePass,
   '/api/doctor/sendEmailChangePassword': ctrl.emailChangePass
-}
-
-routes.DELETE = {
-  '/api/user/:id': ctrl.deleteUserById 
 }
 
 module.exports = routes

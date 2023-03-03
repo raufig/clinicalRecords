@@ -14,9 +14,9 @@ const surgeryOrderSchema = new Schema({
     signature:{ type:  Schema.Types.ObjectId, ref: 'doctor' }
 })
 
-module.exports = model('surgery', surgeryOrderSchema)
 
 
-const Surgery = model("suergery", surgeryOrderSchema);
+
+const Surgery = model("surgery", surgeryOrderSchema);
 module.exports.Surgery = Surgery;
 module.exports.surgeryOrderSchema = surgeryOrderSchema

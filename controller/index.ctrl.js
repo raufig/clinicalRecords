@@ -188,10 +188,7 @@ ctrl.changePass = async (data, res) => {
 }
 
 ctrl.createRecord = async (data, res) => {
-  if(!data.body.document){
-    return res.writeHead(400)
-    .end("pls write the patient document!!!");
-  }
+
   let _token = await token(data.params.id, 'doctor');
   
   if(data.headers.authorization.replace('Bearer ','') !== _token){
@@ -199,74 +196,30 @@ ctrl.createRecord = async (data, res) => {
     .end("unauthorized user!!!");
   }else{
     if(data.method=== 'get'){
+      if(!data.body.document){
+        return res.writeHead(400)
+        .end("pls write the patient document!!!");
+      }
       const doctorId = data.params.id
       
       const patientData = await Patient.findOne({ document: data.body.document })
+      console.log("AQUI", patientData)
+      const populatedData = await ClinicalRecord.find({ patientId: patientData._id.toString(), signature: doctorId })
+      .populate({path:'anamesi'})
+      .populate({path: 'background' })
+      .populate({path: 'medicine' })
+      .populate({path: 'physicalExam' })
+      .populate({path: 'referral' })
+      .populate({path: 'surgery' })
+      .populate({path: 'analysis' })
 
-      const populatedData = await Patient.populate(patientData, [
-        {
-          path: 'anamnesis',
-          match: { signature: doctorId, patientId: patientData._id.toString() },
-          populate: [
-            { path: 'signature', model: 'doctor' },
-            { path: 'patientId', model: 'patient' }
-          ]
-        },
-        {
-          path: 'background',
-          match: { signature: doctorId, patientId: patientData._id.toString() },
-          populate: [
-            { path: 'signature', model: 'doctor' },
-            { path: 'patientId', model: 'patient' }
-          ]
-        },
-        {
-          path: 'clinicalRecord',
-          match: { signature: doctorId, patientId: patientData._id.toString() },
-          populate: [
-            { path: 'signature', model: 'doctor' },
-            { path: 'patientId', model: 'patient' }
-          ]
-        },
-        {
-          path: 'medicines',
-          match: { signature: doctorId, patientId: patientData._id.toString() },
-          populate: [
-            { path: 'signature', model: 'doctor' },
-            { path: 'patientId', model: 'patient' }
-          ]
-        },
-        {
-          path: 'physicalExam',
-          match: { signature: doctorId, patientId: patientData._id.toString() },
-          populate: [
-            { path: 'signature', model: 'doctor' },
-            { path: 'patientId', model: 'patient' }
-          ]
-        },
-        {
-          path: 'referral',
-          match: { signature: doctorId, patientId: patientData._id.toString() },
-          populate: [
-            { path: 'signature', model: 'doctor' },
-            { path: 'patientId', model: 'patient' }
-          ]
-        },
-        {
-          path: 'surgeryOrder',
-          match: { signature: doctorId, patientId: patientData._id.toString() },
-          populate: [
-            { path: 'signature', model: 'doctor' },
-            { path: 'patientId', model: 'patient' }
-          ]
-        }
-      ])
-      
-      
-      res.setHeader("Content-Type", "application/json")
-      .setHeader("Access-Control-Allow-Origin", "*")
-      .writeHead(200)
-      .end(JSON.stringify(populatedData))
+
+
+  res.setHeader("Content-Type", "application/json")
+    .setHeader("Access-Control-Allow-Origin", "*")
+    .writeHead(200)
+    .end(JSON.stringify(populatedData))
+
     }
     if(data.method === 'post' && data.params.action === 'createClinicalRecord'){
       const newClinicalRecord = new ClinicalRecord(data.body)
@@ -287,23 +240,26 @@ ctrl.createRecord = async (data, res) => {
         Medicine:{},
         PhisicalExam:{},
         Referral:{},
-        Surgery:{},
+        surgery:{},
       }
       for(const key in data.body){
         console.log("KEYS: ",key)
-        if(key ==='Analysis')model = Analysis; keyToFind = 'Analysis'
-        if(key ==='Anamesi')model = Anamesi; keyToFind = 'Anamesi'
-        if(key ==='Background')model = Background; keyToFind = 'Background'
-        if(key ==='Medicine')model = Medicine; keyToFind = 'Medicine'
-        if(key ==='PhisicalExam')model = PhisicalExam; keyToFind = 'PhisicalExam'
-        if(key ==='Referral')model = Referral; keyToFind = 'Referral'
-        if(key ==='Surgery')model = Surgery; keyToFind = 'Surgery'
+        if(key ==='Analysis')model = Analysis;
+        if(key ==='Anamesi')model = Anamesi;
+        if(key ==='Background')model = Background;
+        if(key ==='Medicine')model = Medicine;
+        if(key ==='PhisicalExam')model = PhisicalExam;
+        if(key ==='Referral')model = Referral;
+        if(key ==='Surgery')model = Surgery;
         const collection = new model(data.body[key])
         const savedData = await collection.save()
+        //console.log(savedData)
+        const updateClinicalRecords = await ClinicalRecord.findByIdAndUpdate(savedData.clinicalRecordId, {[key.toLowerCase()]: savedData._id.toString() }, {new:true})
+        console.log("AQUI ", updateClinicalRecords)
         Object.assign(payload[key],  savedData)
       }
 
-      console.log(payload)
+      //console.log(payload)
       res.setHeader("Content-Type", "application/json")
       .setHeader("Access-Control-Allow-Origin", "*")
       .writeHead(200)
@@ -312,4 +268,57 @@ ctrl.createRecord = async (data, res) => {
   }
 
 }
+
+ctrl.getClinicalRecords = async (data, res) => {
+  let kindOfUser = data.path.split('/')[2]
+  let _token = await token(data.params.id, kindOfUser);
+  if(data.headers.authorization.replace('Bearer ','') !== _token){
+    return res.writeHead(400)
+        .end("user is not autenticated")
+  }else{
+    let target   = ''
+    if(kindOfUser === 'hospital') target = 'hospitalId'
+    else if(kindOfUser === 'patient') target = 'patientId'
+    const clinicalRecords = await ClinicalRecord.find({[target]:data.params.id})
+    res.setHeader("Content-Type", "application/json")
+      .setHeader("Access-Control-Allow-Origin", "*")
+      .writeHead(200)
+      .end(JSON.stringify(clinicalRecords))
+  }
+}
+
+
+const PDFDocument = require('pdfkit');
+
+
+ctrl.downloadFile =async( data, res) => {
+  let kindOfUser = data.path.split('/')[2]
+  let _token = await token(data.params.id, kindOfUser);
+  if(data.headers.authorization.replace('Bearer ','') !== _token){
+    return res.writeHead(400)
+        .end("user is not autenticated")
+  }else{
+    let target   = ''
+    if(kindOfUser === 'hospital') target = 'hospitalId'
+    else if(kindOfUser === 'patient') target = 'patientId'
+    const clinicalRecords = await ClinicalRecord.find({[target]:data.params.id})
+    const data = JSON.parse(clinicalRecords);
+
+    const doc = new PDFDocument();
+    doc.pipe(fs.createWriteStream(`${data.userName}.pdf`));
+  
+    doc.fontSize(16).text('Clinical record:', { underline: true });
+    doc.moveDown();
+    doc.fontSize(12).text(JSON.stringify(data, null, 2));
+  
+    doc.end();
+    console.log(`PDF file ${`${data.userName}.pdf`} created successfully.`);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=${`${data.userName}.pdf`}`);
+    fs.createReadStream(`${data.userName}.pdf`).pipe(res);
+  }
+ 
+}
+
+
 module.exports = ctrl
