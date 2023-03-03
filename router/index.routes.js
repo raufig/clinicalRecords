@@ -29,8 +29,8 @@ routes.GET = {
   '/api/user/getClinicalRecords': ctrl.getClinicalRecords,
   '/api/hospital/getClinicalRecords': ctrl.getClinicalRecords,
 
-  '/api/user/downloadFile': ctrl.getClinicalRecords,
-  '/api/hospital/downloadFile': ctrl.getClinicalRecords
+  '/api/user/downloadFile': ctrl.downloadFile,
+  '/api/hospital/downloadFile': ctrl.downloadFile
 }
 
 routes.POST = {

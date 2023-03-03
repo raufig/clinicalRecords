@@ -207,6 +207,13 @@ body:
 '/api/patient/changePassword'
 '/api/hospital/changePassword'
 '/api/doctor/changePassword'
+example url: http://localhost:1234/api/hospital/changePassword?id=63fffc6d9f5134d629413131
+body:
+```JSON
+{
+    "newPassword":  "pass123!123"
+}
+```
 
 '/api/doctor/createRecord'
 http://localhost:1234/api/doctor/createRecord?id=64008ba6b76472c14501f1b2&action=fillOutInformation
@@ -354,4 +361,4 @@ http://localhost:1234/api/doctor/sendEmailChangePassword?email=raufig@gmail.com
 
 update password function, check if the email is created in the database, and send an html to the email with instructions to change the password
 
-
+@raufig

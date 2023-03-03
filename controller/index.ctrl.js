@@ -280,6 +280,13 @@ ctrl.getClinicalRecords = async (data, res) => {
     if(kindOfUser === 'hospital') target = 'hospitalId'
     else if(kindOfUser === 'patient') target = 'patientId'
     const clinicalRecords = await ClinicalRecord.find({[target]:data.params.id})
+    .populate({path:'anamesi'})
+    .populate({path: 'background' })
+    .populate({path: 'medicine' })
+    .populate({path: 'physicalExam' })
+    .populate({path: 'referral' })
+    .populate({path: 'surgery' })
+    .populate({path: 'analysis' })
     res.setHeader("Content-Type", "application/json")
       .setHeader("Access-Control-Allow-Origin", "*")
       .writeHead(200)
@@ -294,6 +301,8 @@ const PDFDocument = require('pdfkit');
 ctrl.downloadFile =async( data, res) => {
   let kindOfUser = data.path.split('/')[2]
   let _token = await token(data.params.id, kindOfUser);
+  console.log(_token)
+  console.log(data.headers.authorization)
   if(data.headers.authorization.replace('Bearer ','') !== _token){
     return res.writeHead(400)
         .end("user is not autenticated")
@@ -302,20 +311,28 @@ ctrl.downloadFile =async( data, res) => {
     if(kindOfUser === 'hospital') target = 'hospitalId'
     else if(kindOfUser === 'patient') target = 'patientId'
     const clinicalRecords = await ClinicalRecord.find({[target]:data.params.id})
-    const data = JSON.parse(clinicalRecords);
+    .populate({path:'anamesi'})
+    .populate({path: 'background' })
+    .populate({path: 'medicine' })
+    .populate({path: 'physicalExam' })
+    .populate({path: 'referral' })
+    .populate({path: 'surgery' })
+    .populate({path: 'analysis' })
+    
+    const jsonParsed = clinicalRecords.map(cr => cr.toObject());
 
     const doc = new PDFDocument();
-    doc.pipe(fs.createWriteStream(`${data.userName}.pdf`));
+    doc.pipe(fs.createWriteStream(`${jsonParsed.userName}.pdf`));
   
     doc.fontSize(16).text('Clinical record:', { underline: true });
     doc.moveDown();
-    doc.fontSize(12).text(JSON.stringify(data, null, 2));
+    doc.fontSize(12).text(JSON.stringify(jsonParsed, null, 2));
   
     doc.end();
-    console.log(`PDF file ${`${data.userName}.pdf`} created successfully.`);
+    console.log(`PDF file ${`${jsonParsed.userName}.pdf`} created successfully.`);
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename=${`${data.userName}.pdf`}`);
-    fs.createReadStream(`${data.userName}.pdf`).pipe(res);
+    res.setHeader('Content-Disposition', `attachment; filename=${`${jsonParsed.userName}.pdf`}`);
+    fs.createReadStream(`${jsonParsed.userName}.pdf`).pipe(res);
   }
  
 }

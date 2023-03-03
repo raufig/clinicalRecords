@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const uri = 'mongodb://127.0.0.1:27017/clinicalRecords'
-mongoose.set("strictQuery", false);
+mongoose.set("strictQuery", true);
 mongoose.set("strictPopulate", false);
 mongoose.connect(uri,{
     autoIndex: true,
