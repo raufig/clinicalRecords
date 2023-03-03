@@ -159,7 +159,7 @@ response: (array with all clinical records that containt the same hospital id)
 '/api/patient/downloadFile'
 '/api/hospital/downloadFile'
 example url: http://localhost:1234/api/hospital/downloadFile?id=63fffc6d9f5134d629413131
-response with pdf with the JSON image.png
+response with pdf with the JSON ![img](img.png)
 POST:
 '/api/patient/register'
 body:
